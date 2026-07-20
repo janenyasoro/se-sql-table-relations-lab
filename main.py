@@ -171,7 +171,7 @@ print()
 
 # STEP 9
 # Return the count as a column named n_customers. Also, return the office code and city.
-print("STEP 9: Number of Customers per Office")
+print("STEP 9: Customers Per Office")
 print("-" * 40)
 
 df_customers = pd.read_sql("""
@@ -182,15 +182,16 @@ df_customers = pd.read_sql("""
     GROUP BY o.officeCode, o.city
 """, conn)
 
-print("Customer distribution by office:")
+
 print(df_customers.to_string(index=False))
-print() 
+print()
+
 
 # STEP 10
 # Using a subquery or CTE, select the employee number, first name, last name, 
 # city of the office, and the office code for employees who sold products 
 # that have been ordered by fewer than 20 customers.
-print("STEP 10: Employees Who Sold Products Ordered by Fewer Than 20 Customers")
+print("STEP 10: Employees Who Sold Underperforming Products (< 20 customers)")
 print("-" * 40)
 
 df_under_20 = pd.read_sql("""
@@ -202,16 +203,17 @@ df_under_20 = pd.read_sql("""
         GROUP BY p.productCode
         HAVING COUNT(DISTINCT o.customerNumber) < 20
     )
-    SELECT DISTINCT e.employeeNumber, e.firstName, e.lastName, o.city, o.officeCode
+    SELECT e.employeeNumber, e.firstName, e.lastName, o.city, o.officeCode
     FROM employees e
     JOIN offices o ON e.officeCode = o.officeCode
     JOIN customers c ON e.employeeNumber = c.salesRepEmployeeNumber
     JOIN orders ord ON c.customerNumber = ord.customerNumber
     JOIN orderdetails od ON ord.orderNumber = od.orderNumber
     JOIN product_customers pc ON od.productCode = pc.productCode
+    GROUP BY e.employeeNumber, e.firstName, e.lastName, o.city, o.officeCode
 """, conn)
 
-print(f"found {len(df_under_20)} employees who sold products ordered by fewer than 20 customers")
+print(f"Found {len(df_under_20)} employees who sold underperforming products")
 print(df_under_20.to_string(index=False))
 print()
 
